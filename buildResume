@@ -1,0 +1,15 @@
+#!/bin/bash
+ymlResume="resume.yml"
+mdResume="resume.md"
+pdfResume="finished_resume.pdf"
+
+[[ -e "${mdResume}" ]] && truncate -s0 "${mdResume}"
+
+yq e '"# " + .Name +"<CR>"' "${ymlResume}" >> "${mdResume}"
+echo -e "## Employment\n" >> "${mdResume}"
+yq e '.Employment[] | "## "+ .Position +" - "+ .Company +" "+ .Start +"-"+ .End +"<CR>"+ .Tasks' "${ymlResume}" >> "${mdResume}"
+echo -e "## Projects\n" >> "${mdResume}"
+yq e '.Projects[] | "## "+ .Name + "<CR>" + .Summary' "${ymlResume}" >> "${mdResume}"
+sed -E "s/<CR>/\n\n/" -i.bak "${mdResume}"
+pandoc -V geometry:margin=1in -o "${pdfResume}" -t latex "${mdResume}"
+
