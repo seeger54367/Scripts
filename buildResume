@@ -6,18 +6,25 @@ mdResume="resume.md"
 pdfResume="finished_resume.pdf"
 
 addEmployment () {
-  echo -e "## Employment\n" >> "${mdResume}"
-  yq e '.Employment[] | "## "+ .Position +" - "+ .Company +" "+ .Start +"-"+ .End +"<CR>"+ .Tasks' "${ymlResume}" >> "${mdResume}"
+  echo -e "\n## Employment\n" >> "${mdResume}"
+  yq e '.Employment[] | "### "+ .Position +" - "+ .Company +" "+ .Start +"-"+ .End +"<CR>"+ .Tasks' "${ymlResume}" >> "${mdResume}"
 }
 
 addProjects() {
-  echo -e "## Projects\n" >> "${mdResume}"
-  yq e '.Projects[] | "## "+ .Name + "<CR>" + .Summary' "${ymlResume}" >> "${mdResume}"
+  echo -e "\n## Projects\n" >> "${mdResume}"
+  yq e '.Projects[] | "### "+ .Name + "<CR>" + .Summary' "${ymlResume}" >> "${mdResume}"
+}
+
+addEducation() {
+  echo -e "\n## Education\n" >> "${mdResume}"
+  #yq e '.Education[] | .Start_date +"-"+.End_date +"<CR>"+ .Major +" - "+ .Entity +"<CR>"+ .GPA' "${ymlResume}" >> "${mdResume}"
+  yq e '.Education[] | .Start_date +"-"+.End_date +"<CR>"+ .Major +" - "+ .Entity' "${ymlResume}" >> "${mdResume}"
 }
 
 main () {
   [[ -e "${mdResume}" ]] && truncate -s0 "${mdResume}"
   yq e '"# " + .Name +"<CR>"' "${ymlResume}" >> "${mdResume}"
+  addEducation
   addEmployment
   addProjects
   #Trying to find a replacement for sed
