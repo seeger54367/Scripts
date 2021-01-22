@@ -23,6 +23,5 @@ main () {
   pandoc -V geometry:margin=1in -o "${pdfResume}" -t latex "${mdResume}"
 }
 
-
 main
 
