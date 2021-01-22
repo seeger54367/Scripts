@@ -1,4 +1,6 @@
 #!/bin/bash
+#Written by seeger54367
+#Takes a resume written in yaml and produces a final pdf file
 ymlResume="resume.yml"
 mdResume="resume.md"
 pdfResume="finished_resume.pdf"
