@@ -7,11 +7,15 @@ pdfResume="finished_resume.pdf"
 
 addEmployment () {
   echo -e "\n## Employment\n" >> "${mdResume}"
+  #If jobs have a Type value, jobs with only that type can be selected.
+  #yq e '.Employment[] | select(.Type == "Tech") | "## "+ .Position +" - "+ .Company +" "+ .Start +"-"+ .End +"<CR>"+ .Tasks' "${ymlResume}" >> "${mdResume}"
   yq e '.Employment[] | "### "+ .Position +" - "+ .Company +" "+ .Start +"-"+ .End +"<CR>"+ .Tasks' "${ymlResume}" >> "${mdResume}"
 }
 
 addProjects() {
   echo -e "\n## Projects\n" >> "${mdResume}"
+  #If projects have a Type value, projects with only that type can be selected.
+  #yq e '.Projects[] | select(.Type == "Personal") | "### "+ .Name + "<CR>" + .Summary' "${ymlResume}" >> "${mdResume}"
   yq e '.Projects[] | "### "+ .Name + "<CR>" + .Summary' "${ymlResume}" >> "${mdResume}"
 }
 
