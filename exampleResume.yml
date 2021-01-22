@@ -1,0 +1,85 @@
+--- 
+Name: First Last
+Location: USA
+
+Summary: |
+  Here is some information about me
+
+Contact:
+  Email:  flname@domain.com
+  GitHub: https://github.com/seeger54367
+
+Education:
+
+- Entity:        Random University
+  Location:      Coolsville, USA
+  Major:         Information Technology
+  Concentration: System Administration
+  Start_date:    September 2012
+  End_date:      April 2016 (expected)
+  GPA:           "3.93 (4.0 = A)"
+
+Technical_Skills:
+- Programming_languages:
+  - Bash
+  - Python
+  - Git
+  - Markdown
+  - LaTeX
+  - PHP
+  - Windows batch
+  - Powershell
+  - HTML
+  - CSS
+  - MySQL
+  - Java
+  - Visual BASIC
+- Software: 
+  - Unix BASH
+  - Linux, Windows, and Mac OS installation and troubleshooting
+  - Wireshark
+  - DBAN
+  - Clonezilla
+  - Mircrosoft Word, Excel, Powerpoint, Access
+  - Malwarebytes
+  - Ansible
+  - vSphere
+- Hardware:
+  - Network cable creation
+  - Hard drive removal
+  - Disassembly and reassembly of tower and AIO form factors
+  - Hardware identification and troubleshooting
+  - Proper setup of laptop, tower, and AIO form factors
+  - Physical installation and removal of rack mounted servers
+
+Employment:
+
+- Company: Company1
+  Department: Department1
+  Position: Position1
+  Start: May 2019
+  End:
+  Tasks: |
+   - Create, update, and maintain Redhat Enterprise Linux (RHEL) servers
+   - Something else I did
+   - Insert impressive task here
+
+- Company: Company2
+  Department: Department2
+  Position: Position2
+  Start: September 2017
+  End: May 2019
+  Tasks: |
+    - Troubleshot printers, desktops, laptops
+    - Completed physical setup and encryption of laptops and desktops
+    - Example task 3
+
+Projects:
+
+- Name: Personal Adoption
+  Type: Personal
+  Summary: |
+    Implemented security practices such as 2FA on online accounts; password manager; full disk encryption; secure, E2E communications where possible.
+
+
+
