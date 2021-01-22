@@ -3,11 +3,9 @@ ymlResume="resume.yml"
 mdResume="resume.md"
 pdfResume="finished_resume.pdf"
 
-[[ -e "${mdResume}" ]] && truncate -s0 "${mdResume}"
-
 addEmployment () {
-echo -e "## Employment\n" >> "${mdResume}"
-yq e '.Employment[] | "## "+ .Position +" - "+ .Company +" "+ .Start +"-"+ .End +"<CR>"+ .Tasks' "${ymlResume}" >> "${mdResume}"
+  echo -e "## Employment\n" >> "${mdResume}"
+  yq e '.Employment[] | "## "+ .Position +" - "+ .Company +" "+ .Start +"-"+ .End +"<CR>"+ .Tasks' "${ymlResume}" >> "${mdResume}"
 }
 
 addProjects() {
@@ -16,12 +14,15 @@ addProjects() {
 }
 
 main () {
+  [[ -e "${mdResume}" ]] && truncate -s0 "${mdResume}"
   yq e '"# " + .Name +"<CR>"' "${ymlResume}" >> "${mdResume}"
   addEmployment
   addProjects
+  #Trying to find a replacement for sed
   sed -E "s/<CR>/\n\n/" -i.bak "${mdResume}"
-  pandoc -V geometry:margin=1in -o "${pdfResume}" -t latex "${mdResume}"
+  pandoc -V geometry:margin=0.75in -o "${pdfResume}" -t latex "${mdResume}"
+  exit 0
 }
 
-main
-
+[[ -n "${1}" ]] && ymlResume="${1}"
+([[ -e "${ymlResume}" ]] && main) || (echo "Designated file doesn't exist" && exit 32)
