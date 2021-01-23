@@ -1,0 +1,10 @@
+#!/bin/bash
+cd "${HOME}"/.local/bin
+curl -LO https://raw.githubusercontent.com/rwxrob/dotfiles/master/scripts/duck
+echo "alias \?=\"${HOME}/.local/bin/duck\"" >> "${HOME}"/.bash_aliases
+source "${HOME}"/.bash_aliases
+curl -LO https://raw.githubusercontent.com/rwxrob/dotfiles/master/common/lynx/lynx
+mkdir "${HOME}"/.config/lynx
+cd "${HOME}"/.config/lynx
+curl -LO https://raw.githubusercontent.com/rwxrob/dotfiles/master/common/lynx/lynx.cfg
+curl -LO https://raw.githubusercontent.com/rwxrob/dotfiles/master/common/lynx/lynx.lss 
