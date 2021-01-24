@@ -9,20 +9,20 @@ addEmployment () {
   echo -e "\n## Employment\n" >> "${mdResume}"
   #If jobs have a Type value, jobs with only that type can be selected.
   #yq e '.Employment[] | select(.Type == "Tech") | "## "+ .Position +" - "+ .Company +" "+ .Start +"-"+ .End +"<CR>"+ .Tasks' "${ymlResume}" >> "${mdResume}"
-  yq e '.Employment[] | "### "+ .Position +" - "+ .Company +" "+ .Start +"-"+ .End +"<CR>"+ .Tasks' "${ymlResume}" >> "${mdResume}"
+  echo -e "$(yq e '.Employment[] | "### "+ .Position +" - "+ .Company +" "+ .Start +"-"+ .End +"\n"+ .Tasks' "${ymlResume}")" >> "${mdResume}"
 }
 
 addProjects() {
   echo -e "\n## Projects\n" >> "${mdResume}"
   #If projects have a Type value, projects with only that type can be selected.
   #yq e '.Projects[] | select(.Type == "Personal") | "### "+ .Name + "<CR>" + .Summary' "${ymlResume}" >> "${mdResume}"
-  yq e '.Projects[] | "### "+ .Name + "<CR>" + .Summary' "${ymlResume}" >> "${mdResume}"
+  echo -e "$(yq e '.Projects[] | "### "+ .Name + "\n" + .Summary' "${ymlResume}")" >> "${mdResume}"
 }
 
 addEducation() {
   echo -e "\n## Education\n" >> "${mdResume}"
   #yq e '.Education[] | .Start_date +"-"+.End_date +"<CR>"+ .Major +" - "+ .Entity +"<CR>"+ .GPA' "${ymlResume}" >> "${mdResume}"
-  yq e '.Education[] | .Start_date +"-"+.End_date +"<CR>"+ .Major +" - "+ .Entity' "${ymlResume}" >> "${mdResume}"
+  echo -e "$(yq e '.Education[] | .Start_date +"-"+.End_date +"\n"+ .Major +" - "+ .Entity' "${ymlResume}")" >> "${mdResume}"
 }
 
 main () {
@@ -32,7 +32,6 @@ main () {
   addEmployment
   addProjects
   #Trying to find a replacement for sed
-  sed -E "s/<CR>/\n\n/" -i.bak "${mdResume}"
   pandoc -V geometry:margin=0.75in -o "${pdfResume}" -t latex "${mdResume}"
   exit 0
 }
