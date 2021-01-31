@@ -9,7 +9,18 @@ addEmployment () {
   echo -e "\n## Employment\n" >> "${mdResume}"
   #If jobs have a Type value, jobs with only that type can be selected.
   #yq e '.Employment[] | select(.Type == "Tech") | "## "+ .Position +" - "+ .Company +" "+ .Start +"-"+ .End +"<CR>"+ .Tasks' "${ymlResume}" >> "${mdResume}"
-  yq e '.Employment[] | "### "+ .Position +" - "+ .Company +" "+ .Start +"-"+ .End +"'$'\n"+ .Tasks' "${ymlResume}" >> "${mdResume}"
+  options=$(yq e '.Employment[].Position | .' resume.yml)
+  IFS=','
+  read -ra optionsArr <<< "${options//$'\n'/','}"
+  for line in "${optionsArr[@]}"; do
+    #echo -e "${line}"
+    echo -e "\n" >> "${mdResume}"
+    yq e $(echo ".Employment[] | select(.Position == \"${line}\") | \"### \"+ .Position +\" - \"+ .Company +\" \"+ .Start +\"-\"+ .End") "${ymlResume}" >> "${mdResume}"
+    echo -e "\n" >> "${mdResume}"
+    yq e $(echo ".Employment[] | select(.Position == \"${line}\") | \"- \" + .Tasks[]") "${ymlResume}" >> "${mdResume}"
+  done
+  IFS=' '
+  #yq e '.Employment[] | "### "+ .Position +" - "+ .Company +" "+ .Start +"-"+ .End +"'$'\n"+ .Tasks' "${ymlResume}" >> "${mdResume}"
 }
 
 addProjects() {
