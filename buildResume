@@ -4,48 +4,62 @@
 ymlResume="resume.yml"
 mdResume="resume.md"
 pdfResume="finished_resume.pdf"
+NUMARGS=$#
+positionType="*"
+if [ $NUMARGS -eq 0 ]; then
+  sleep 0
+else
+  while getopts :e:f: FLAG; do
+    case $FLAG in
+      e) positionType=$OPTARG;;
+      f) ymlResume=$OPTARG;;
+    esac
+  done
+fi
 
 addEmployment () {
   echo -e "\n## Employment\n" >> "${mdResume}"
-  #If jobs have a Type value, jobs with only that type can be selected.
-  #yq e '.Employment[] | select(.Type == "Tech") | "## "+ .Position +" - "+ .Company +" "+ .Start +"-"+ .End +"<CR>"+ .Tasks' "${ymlResume}" >> "${mdResume}"
-  options=$(yq e '.Employment[].Position | .' resume.yml)
-  IFS=','
-  read -ra optionsArr <<< "${options//$'\n'/','}"
-  for line in "${optionsArr[@]}"; do
-    #echo -e "${line}"
-    echo -e "\n" >> "${mdResume}"
-    yq e $(echo ".Employment[] | select(.Position == \"${line}\") | \"### \"+ .Position +\" - \"+ .Company +\" \"+ .Start +\"-\"+ .End") "${ymlResume}" >> "${mdResume}"
-    echo -e "\n" >> "${mdResume}"
-    yq e $(echo ".Employment[] | select(.Position == \"${line}\") | \"- \" + .Tasks[]") "${ymlResume}" >> "${mdResume}"
-  done
-  IFS=' '
-  #yq e '.Employment[] | "### "+ .Position +" - "+ .Company +" "+ .Start +"-"+ .End +"'$'\n"+ .Tasks' "${ymlResume}" >> "${mdResume}"
+  #If jobs have a Type value, jobs with only that type can be selected. Otherwise selects all jobs.
+  results=$(yq e ".Employment[] | select(.Type == \"${positionType}\") |  .Position" resume.yml)
+  while IFS= read -r line; do 
+    yq e ".Employment[] | select(.Position == \"${line}\") | \"#### \"+ .Position +\" - \"+ .Company +\" \"+ .Start +\"-\"+ .End" "${ymlResume}" >> "${mdResume}"
+    echo -e "" >> "${mdResume}"
+    yq e ".Employment[] | select(.Position == \"${line}\") | \"* \"+ .Tasks[]" "${ymlResume}" >> "${mdResume}";
+    echo -e "" >> "${mdResume}"
+  done <<< "$results"
+
 }
 
 addProjects() {
   echo -e "\n## Projects\n" >> "${mdResume}"
   #If projects have a Type value, projects with only that type can be selected.
-  #yq e '.Projects[] | select(.Type == "Personal") | "### "+ .Name + "<CR>" + .Summary' "${ymlResume}" >> "${mdResume}"
   yq e '.Projects[] | "### "+ .Name + "'$'\n" + .Summary' "${ymlResume}" >> "${mdResume}"
 }
 
 addEducation() {
   echo -e "\n## Education\n" >> "${mdResume}"
-  #yq e '.Education[] | .Start_date +"-"+.End_date +"<CR>"+ .Major +" - "+ .Entity +"<CR>"+ .GPA' "${ymlResume}" >> "${mdResume}"
   yq e '.Education[] | .Start_date +"-"+.End_date +"'$'\n"+ .Major +" - "+ .Entity' "${ymlResume}" >> "${mdResume}"
+}
+
+addHorizontalLine() {
+  echo -e "\n----\n" >> "${mdResume}"
+}
+
+addSkills() {
+  echo "Skills to be added"
 }
 
 main () {
   [[ -e "${mdResume}" ]] && truncate -s0 "${mdResume}"
-  yq e '"# " + .Name +"<CR>"' "${ymlResume}" >> "${mdResume}"
+  yq e '"## " + .Name +"<CR>"' "${ymlResume}" >> "${mdResume}"
+  addHorizontalLine
   addEducation
+  addHorizontalLine
   addEmployment
+  addHorizontalLine
   addProjects
-  #Trying to find a replacement for sed
   pandoc -V geometry:margin=0.75in -o "${pdfResume}" -t latex "${mdResume}"
   exit 0
 }
 
-[[ -n "${1}" ]] && ymlResume="${1}"
 ([[ -e "${ymlResume}" ]] && main) || (echo "Designated file doesn't exist" && exit 32)

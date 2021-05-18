@@ -59,20 +59,20 @@ Employment:
   Position: Position1
   Start: May 2019
   End:
-  Tasks: |
-   - Create, update, and maintain Redhat Enterprise Linux (RHEL) servers
-   - Something else I did
-   - Insert impressive task here
+  Tasks:
+  - Create, update, and maintain Redhat Enterprise Linux (RHEL) servers
+  - Something else I did
+  - Insert impressive task here
 
 - Company: Company2
   Department: Department2
   Position: Position2
   Start: September 2017
   End: May 2019
-  Tasks: |
-    - Troubleshot printers, desktops, laptops
-    - Completed physical setup and encryption of laptops and desktops
-    - Example task 3
+  Tasks:
+  - Troubleshot printers, desktops, laptops
+  - Completed physical setup and encryption of laptops and desktops
+  - Example task 3
 
 Projects:
 
