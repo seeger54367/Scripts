@@ -1,6 +1,7 @@
 #!/bin/bash
 #Written by seeger54367
 #Takes a resume written in yaml and produces a final pdf file
+##TODO Add check for yq command
 ymlResume="resume.yml"
 mdResume="resume.md"
 pdfResume="finished_resume.pdf"
@@ -46,7 +47,11 @@ addHorizontalLine() {
 }
 
 addSkills() {
-  echo "Skills to be added"
+  echo -e "\n## Technical Skills\n" >> "${mdResume}"
+  types=$(yq e '.Technical_Skills[] | .Type' "${ymlResume}")
+  while IFS= read -r line; do 
+    echo "$(yq e ".Technical_Skills[] | select(.Type == \"${line}\") | .Skills[] +\";\"" "${ymlResume}" | tr '\n' ' ')" >> "{mdResume}"
+  done <<< "$types"
 }
 
 main () {
@@ -54,6 +59,8 @@ main () {
   yq e '"## " + .Name +"<CR>"' "${ymlResume}" >> "${mdResume}"
   addHorizontalLine
   addEducation
+  addHorizontalLine
+  addSkills
   addHorizontalLine
   addEmployment
   addHorizontalLine
