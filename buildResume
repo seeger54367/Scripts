@@ -24,9 +24,9 @@ addEmployment () {
   results=$(yq e ".Employment[] | select(.Type == \"${positionType}\") |  .Position" resume.yml)
   while IFS= read -r line; do 
     yq e ".Employment[] | select(.Position == \"${line}\") | \"#### \"+ .Position +\" - \"+ .Company +\" \"+ .Start +\"-\"+ .End" "${ymlResume}" >> "${mdResume}"
-    echo -e "" >> "${mdResume}"
+    echo "" >> "${mdResume}"
     yq e ".Employment[] | select(.Position == \"${line}\") | \"* \"+ .Tasks[]" "${ymlResume}" >> "${mdResume}";
-    echo -e "" >> "${mdResume}"
+    echo "" >> "${mdResume}"
   done <<< "$results"
 
 }
@@ -50,7 +50,12 @@ addSkills() {
   echo -e "\n## Technical Skills\n" >> "${mdResume}"
   types=$(yq e '.Technical_Skills[] | .Type' "${ymlResume}")
   while IFS= read -r line; do 
-    echo "$(yq e ".Technical_Skills[] | select(.Type == \"${line}\") | .Skills[] +\";\"" "${ymlResume}" | tr '\n' ' ')" >> "{mdResume}"
+    skillTypes="$(yq e ".Technical_Skills[] | select(.Type == \"${line}\") | .Skills[] +\";\"" "${ymlResume}" )"
+    skills=""
+    while IFS="\n" read -r skill; do
+      skills="${skills} ${skill}"
+    done  <<< "$skillTypes"
+    printf "**${line}**: ${skills}\n\n" >> "${mdResume}"
   done <<< "$types"
 }
 
