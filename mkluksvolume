@@ -1,0 +1,53 @@
+#!/bin/sh
+set -e
+# Based on instructions from https://blog.canadianwebhosting.com/how-to-create-an-encrypted-container/
+# The name for the encrypted volume when it is mounted
+mountName="myEncryptedVolume"
+# Place to mount opened volume
+mountPoint="$HOME/Private"
+
+check_dependencies() {
+  command -v "dd" && command -v "cryptsetup" && command -v "mkfs.ext4" && command -v "mount" && return
+  echo "Please check dependencies" && exit
+}
+
+# Create the base image
+create_base_volume () {
+  dd if=/dev/zero of="${volumeName}" bs=1 count=0 seek="${sizeInG}G"
+}
+
+# Encrypt image, open encrypted image, and make the filesystem
+encrypt_volume() {
+  sudo cryptsetup luksFormat "${volumeName}" 
+  sudo cryptsetup open "${volumeName}" "${mountName}"
+  sudo mkfs.ext4 /dev/mapper/"${mountName}"
+}
+
+mount_volume() {
+  test ! -d "${mountPoint}" && mkdir "${mountPoint}"
+  sudo mount /dev/mapper/"${mountName}" "${mountPoint}"
+}
+
+unmount_volume() {
+  sudo cryptsetup close "${mountName}"
+}
+
+main() {
+  check_dependencies
+  echo "Please enter the desired name of the volume"
+  read volumeName
+  echo "Please enter the size of the continer in Gigabytes"
+  read sizeInG
+  printf "Name: ${volumeName}\nSize: ${sizeInG}G\n"
+  echo "Do you want this volume to me mounted? y/N"
+  read mountOption
+  create_base_volume
+  encrypt_volume
+  case ${mountOption} in 
+    *y*|*Y*) mount_volume; exit ;;
+    *n*|*N*) unmount_volume; exit ;;
+      *) echo "Please enter a valid option" ;;
+  esac
+}
+
+main
