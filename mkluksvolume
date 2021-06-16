@@ -38,8 +38,7 @@ main() {
   read volumeName
   echo "Please enter the size of the container in Gigabytes"
   read sizeInG
-  printf "Name: ${volumeName}\nSize: ${sizeInG}G\n"
-  echo "Do you want this volume to me mounted? y/N"
+  printf "Name: ${volumeName}\nSize: ${sizeInG}G\nDo you want this volume to me mounted? y/N\n"
   read mountOption
   create_base_volume
   encrypt_volume
