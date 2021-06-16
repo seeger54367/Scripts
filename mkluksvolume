@@ -36,7 +36,7 @@ main() {
   check_dependencies
   echo "Please enter the desired name of the volume"
   read volumeName
-  echo "Please enter the size of the container in Gigabytes"
+  echo "Please enter the size of the volume in Gigabytes"
   read sizeInG
   printf "Name: ${volumeName}\nSize: ${sizeInG}G\nDo you want this volume to me mounted? y/N\n"
   read mountOption
