@@ -35,11 +35,11 @@ unmount_volume() {
 main() {
   check_dependencies
   echo "Please enter the desired name of the volume"
-  read volumeName
+  read -r volumeName
   echo "Please enter the size of the volume in Gigabytes"
-  read sizeInG
-  printf "Name: ${volumeName}\nSize: ${sizeInG}G\nDo you want this volume to me mounted? y/N\n"
-  read mountOption
+  read -r sizeInG
+  printf "Name: %s\nSize: %sG\nDo you want this volume to me mounted? y/N\n" "${volumeName}" "${sizeInG}"
+  read -r mountOption
   create_base_volume
   encrypt_volume
   case ${mountOption} in 
