@@ -1,0 +1,35 @@
+#!/bin/sh
+getInfo(){
+  echo "Enter age"
+  read -r age
+  test "$age" -gt 20 -a "$age" -lt 40 && lowestHealthyPercentage=8 && highestHealthyPercentage=19 && highestOverweightPercentage=25
+  test "$age" -gt 41 -a "$age" -lt 60 && lowestHealthyPercentage=11 && highestHealthyPercentage=22 && highestOverweightPercentage=27
+  test "$age" -gt 61 -a "$age" -lt 79 && lowestHealthyPercentage=13 && highestHealthyPercentage=25 && highestOverweightPercentage=30
+  echo "Enter height in inches"
+  read -r heightInInches
+  echo "Enter weight in lbs"
+  read -r weight
+}
+
+calculateBMI(){
+  BMI=$(echo "scale=2; ($weight*703)/$heightInInches^2"| bc)
+}
+
+getFatPercentage(){
+  fatPercentage=$(echo "scale=2; (1.20 * $BMI) + (0.23 * $age) - 16.2" | bc)
+  testFatPercentage="${fatPercentage%%.*}"
+  test "$ageBracket" -eq 0 
+  test "$testFatPercentage" -lt "$lowestHealthyPercentage" && percentageStatus="Underfat"
+  test "$testFatPercentage" -ge "$lowestHealthyPercentage" -a "$testFatPercentage" -le "$highestHealthyPercentage" && percentageStatus="Healthy"
+  test "$testFatPercentage" -gt "$highestHealthyPercentage" -a "$testFatPercentage" -le "$highestOverweightPercentage" && percentageStatus="Overweight"
+  test "$testFatPercentage" -gt "$highestOverweightPercentage" && percentageStatus="Obese"
+  printf "Your Body Fat Percentage: %s%% \nYou are: %s\n" "$fatPercentage" "$percentageStatus"
+}
+
+main() {
+    getInfo
+    calculateBMI
+    getFatPercentage
+}
+
+main
