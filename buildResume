@@ -14,6 +14,7 @@ else
     case $FLAG in
       e) positionType=$OPTARG;;
       f) ymlResume=$OPTARG;;
+      *) continue;;
     esac
   done
 fi
@@ -23,10 +24,7 @@ addEmployment () {
   #If jobs have a Type value, jobs with only that type can be selected. Otherwise selects all jobs.
   results=$(yq e ".Employment[] | select(.Type == \"${positionType}\") |  .Position" resume.yml)
   while IFS= read -r line; do 
-    yq e ".Employment[] | select(.Position == \"${line}\") | \"#### \"+ .Position +\" - \"+ .Company +\" \"+ .Start +\"-\"+ .End" "${ymlResume}" >> "${mdResume}"
-    echo "" >> "${mdResume}"
-    yq e ".Employment[] | select(.Position == \"${line}\") | \"* \"+ .Tasks[]" "${ymlResume}" >> "${mdResume}";
-    echo "" >> "${mdResume}"
+    { yq e ".Employment[] | select(.Position == \"${line}\") | \"#### \"+ .Position +\" - \"+ .Company +\" \"+ .Start +\"-\"+ .End" "${ymlResume}"; echo ""; yq e ".Employment[] | select(.Position == \"${line}\") | \"* \"+ .Tasks[]" "${ymlResume}"; echo ""; } >> "${mdResume}"
   done <<< "$results"
 
 }
@@ -52,16 +50,21 @@ addSkills() {
   while IFS= read -r line; do 
     skillTypes="$(yq e ".Technical_Skills[] | select(.Type == \"${line}\") | .Skills[] +\";\"" "${ymlResume}" )"
     skills=""
-    while IFS="\n" read -r skill; do
+#    while IFS="\n" read -r skill; do
+     while IFS=$'\n' read -r skill; do
       skills="${skills} ${skill}"
     done  <<< "$skillTypes"
-    printf "**${line}**: ${skills}\n\n" >> "${mdResume}"
+    printf "**%s**: %s\n\n" "${line}" "${skills}" >> "${mdResume}"
   done <<< "$types"
+}
+
+addHeader() {
+  { yq e '"## " + .Name +"'$'\n"' "${ymlResume}"; yq e '.Contact.Email +" - " + .Contact.Phone +"'$'\n"' "${ymlResume}"; } >> "${mdResume}"
 }
 
 main () {
   [[ -e "${mdResume}" ]] && truncate -s0 "${mdResume}"
-  yq e '"## " + .Name +"<CR>"' "${ymlResume}" >> "${mdResume}"
+  addHeader
   addHorizontalLine
   addEducation
   addHorizontalLine
