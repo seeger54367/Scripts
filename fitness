@@ -1,0 +1,68 @@
+#!/bin/bash
+# TODO add way to update challenge reps
+
+[[ -z $WORKOUTLOG ]] && echo "WORKOUTLOG variable not set"
+[[ -z $WEIGHTFILE ]] && echo "WEIGHTFILE variable not set"
+[[ -z $CHALLENGEFILE ]] && echo "CHALLENGEFILE variable not set"
+goal=100
+currDay="$(date +"%w")"
+currDate="$(date -u +%Y%m%d)"
+progressLine="$(tail -n 1 ${CHALLENGEFILE})"
+[[ ${progressLine##* } = "${currDate}" ]] && repsMade="${progressLine%% *}" || repsMade=0
+
+# ------------------------- complete context -------------------------
+
+declare -a COMMANDS=(addworkout addexercise addweight getChallengeStatus updateChallenge)
+
+if [[ -n $COMP_LINE ]]; then
+    for c in "${COMMANDS[@]}"; do
+        [[ ${c:0:${#2}} = "${2,,}" ]] && echo "$c"
+    done
+    exit
+fi
+
+# -------------------------- end completion --------------------------
+
+
+addworkout(){
+  test -z "${1}" && echo "Please enter a workout Type (ie Arms/Legs)" && exit
+  workoutType="${1}"
+  printf "\n- date: $(date)\n  - type: %s\n  - Exercises:\n    -\n" "${workoutType}" >> "${WORKOUTLOG}" 
+  exec vim "${WORKOUTLOG}"
+}
+
+addexercise(){
+  printf "    -\n" >> "${WORKOUTLOG}"
+  exec vim "${WORKOUTLOG}"
+}
+
+addweight(){
+  curDate="$(date)"
+  printf "\n- date: %s\n  - weight: " "${curDate}" >> "${WEIGHTFILE}"
+  exec vim "${WEIGHTFILE}"
+}
+
+setChallengeVars(){
+  [[ $currDay = 1 || $currDay = 4 ]] && challenge="pushups"
+  [[ $currDay = 2 || $currDay = 5 ]] && challenge="situps"
+  [[ $currDay = 3 || $currDay = 6 ]] && challenge="squats"
+}
+
+getChallengeStatus(){
+  setChallengeVars
+  echo "Today's challenge is ${goal} ${challenge}"
+  numberLeft="$(echo "scale=2; ${goal} - ${repsMade}" | bc)"
+  ([[ ${progressLine##* } = "${currDate}" ]] && echo "${repsMade} completed so far. ${numberLeft} to go.") || echo "No reps completed so far. ${goal} reps to go."
+}
+
+updateChallenge() {
+  setChallengeVars
+  [[ ${progressLine##* } = "${currDate}" ]] && read -rp "How many reps do you want to add? " addedReps && newReps="$(echo "scale=2; ${addedReps} + ${repsMade}" | bc)" 
+  printf "%s\n%s %s %s\n" "$(sed \$d ${CHALLENGEFILE})" "${newReps}" "${challenge}" "${currDate}" > "${CHALLENGEFILE}"
+}
+
+main(){
+  "$@"
+}
+
+main "$@"
