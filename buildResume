@@ -20,24 +20,25 @@ else
 fi
 
 addEmployment () {
-  echo -e "\n## Employment\n" >> "${mdResume}"
   #If jobs have a Type value, jobs with only that type can be selected. Otherwise selects all jobs.
   results=$(yq e ".Employment[] | select(.Type == \"${positionType}\") |  .Position" resume.yml)
   while IFS= read -r line; do 
-    { yq e ".Employment[] | select(.Position == \"${line}\") | \"#### \"+ .Position +\" - \"+ .Company +\" \"+ .Start +\"-\"+ .End" "${ymlResume}"; echo ""; yq e ".Employment[] | select(.Position == \"${line}\") | \"* \"+ .Tasks[]" "${ymlResume}"; echo ""; } >> "${mdResume}"
+  #   { yq e ".Employment[] | select(.Position == \"${line}\") | \"**\"+ .Position +\"** - \"+ .Company +\" \"+ .Start +\"-\"+ .End " "${ymlResume}"; echo ""; yq e ".Employment[] | select(.Position == \"${line}\") | \"* \"+ .Tasks[]" "${ymlResume}"; echo ""; } >> "${mdResume}"
+    { yq e ".Employment[] | select(.Position == \"${line}\") | \"**\"+ .Position +\"** - \"+ .Company +\" \"" "${ymlResume}"; echo "\hspace*{\fill}"; yq e ".Employment[] | select(.Position == \"${line}\") | .Start +\"-\"+ .End " "${ymlResume}"; echo ""; yq e ".Employment[] | select(.Position == \"${line}\") | \"* \"+ .Tasks[]" "${ymlResume}"; echo ""; } >> "${mdResume}"
   done <<< "$results"
+}
 
+addHeading(){
+  printf "\\\begin{center}\n\\\begin{large}\\\textbf{%s}\n\\\end{large}\\\end{center}" "$1" >> "${mdResume}"
 }
 
 addProjects() {
-  echo -e "\n## Projects\n" >> "${mdResume}"
   #If projects have a Type value, projects with only that type can be selected.
-  yq e '.Projects[] | "### "+ .Name + "'$'\n" + .Summary' "${ymlResume}" >> "${mdResume}"
+  yq e '.Projects[] | "\textbf{ "+ .Name + "}'$'\n\n" + .Summary' "${ymlResume}" >> "${mdResume}"
 }
 
 addEducation() {
-  echo -e "\n## Education\n" >> "${mdResume}"
-  yq e '.Education[] | .Start_date +"-"+.End_date +"'$'\n"+ .Major +" - "+ .Entity' "${ymlResume}" >> "${mdResume}"
+  { yq e '.Education[] | "\textbf{Major}: "+  .Major +" - "+ .Entity +" - GPA: "+ .GPA ' "${ymlResume}"; echo "\hspace*{\fill}"; yq e '.Education[] | .End_date' "${ymlResume}" ; echo ""; yq e '.Education[] | "Concentration: "+ .Concentration' "${ymlResume}";} >> "${mdResume}"
 }
 
 addHorizontalLine() {
@@ -45,12 +46,10 @@ addHorizontalLine() {
 }
 
 addSkills() {
-  echo -e "\n## Technical Skills\n" >> "${mdResume}"
   types=$(yq e '.Technical_Skills[] | .Type' "${ymlResume}")
   while IFS= read -r line; do 
     skillTypes="$(yq e ".Technical_Skills[] | select(.Type == \"${line}\") | .Skills[] +\";\"" "${ymlResume}" )"
     skills=""
-#    while IFS="\n" read -r skill; do
      while IFS=$'\n' read -r skill; do
       skills="${skills} ${skill}"
     done  <<< "$skillTypes"
@@ -58,22 +57,35 @@ addSkills() {
   done <<< "$types"
 }
 
-addHeader() {
-  { yq e '"## " + .Name +"'$'\n"' "${ymlResume}"; yq e '.Contact.Email +" - " + .Contact.Phone +"'$'\n"' "${ymlResume}"; } >> "${mdResume}"
+addTitle() {
+  { yq e '"'\\begin\{center\}\\begin\{Large\}\\textbf\{'"+"'$'\n" + .Name +"'\}\\end\{Large\}$'\n"' "${ymlResume}"; yq e '.Contact.Email +" - " + .Contact.Phone +"'$'\n'\\end\{center\}'"' "${ymlResume}"; } >> "${mdResume}"
+}
+
+addSummary() {
+  yq e '.Summary' "${ymlResume}"  >> "${mdResume}"
+}
+
+addActivities(){
+  yq e '.Activities' "${ymlResume}" >> "${mdResume}"
 }
 
 main () {
   [[ -e "${mdResume}" ]] && truncate -s0 "${mdResume}"
-  addHeader
+  addTitle
   addHorizontalLine
+  addHeading "Summary"
+  addSummary
+  addHeading "Education"
   addEducation
-  addHorizontalLine
-  addSkills
-  addHorizontalLine
+  addHeading "Employment"
   addEmployment
-  addHorizontalLine
+  addHeading "Technical Skills"
+  addSkills
+  addHeading "Projects"
   addProjects
-  pandoc -V geometry:margin=0.75in -o "${pdfResume}" -t latex "${mdResume}"
+  addHeading "Activities"
+  addActivities
+  pandoc -V geometry:margin=0.25in -o "${pdfResume}" -t latex "${mdResume}"
   exit 0
 }
 
