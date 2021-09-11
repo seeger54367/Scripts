@@ -1,4 +1,5 @@
 #!/bin/bash
+set -x
 #Written by seeger54367
 #Takes a resume written in yaml and produces a final pdf file
 ##TODO Add check for yq command
@@ -21,9 +22,8 @@ fi
 
 addEmployment () {
   #If jobs have a Type value, jobs with only that type can be selected. Otherwise selects all jobs.
-  results=$(yq e ".Employment[] | select(.Type == \"${positionType}\") |  .Position" resume.yml)
+  results=$(yq e ".Employment[] | select(.Type == \"${positionType}\") |  .Position" "${ymlResume}")
   while IFS= read -r line; do 
-  #   { yq e ".Employment[] | select(.Position == \"${line}\") | \"**\"+ .Position +\"** - \"+ .Company +\" \"+ .Start +\"-\"+ .End " "${ymlResume}"; echo ""; yq e ".Employment[] | select(.Position == \"${line}\") | \"* \"+ .Tasks[]" "${ymlResume}"; echo ""; } >> "${mdResume}"
     { yq e ".Employment[] | select(.Position == \"${line}\") | \"**\"+ .Position +\"** - \"+ .Company +\" \"" "${ymlResume}"; echo "\hspace*{\fill}"; yq e ".Employment[] | select(.Position == \"${line}\") | .Start +\"-\"+ .End " "${ymlResume}"; echo ""; yq e ".Employment[] | select(.Position == \"${line}\") | \"* \"+ .Tasks[]" "${ymlResume}"; echo ""; } >> "${mdResume}"
   done <<< "$results"
 }
