@@ -1,5 +1,4 @@
 #!/bin/bash
-set -x
 #Written by seeger54367
 #Takes a resume written in yaml and produces a final pdf file
 ##TODO Add check for yq command
