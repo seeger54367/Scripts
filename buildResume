@@ -2,6 +2,7 @@
 #Written by seeger54367
 #Takes a resume written in yaml and produces a final pdf file
 ##TODO Add check for yq command
+summaryTitle="Summary"
 ymlResume="resume.yml"
 mdResume="resume.md"
 pdfResume="finished_resume.pdf"
@@ -10,14 +11,24 @@ positionType="*"
 if [ $NUMARGS -eq 0 ]; then
   sleep 0
 else
-  while getopts :e:f: FLAG; do
+  while getopts :e:f:o:s: FLAG; do
     case $FLAG in
       e) positionType=$OPTARG;;
       f) ymlResume=$OPTARG;;
+      o) pdfResume=$OPTARG;;
+      s) summaryTitle=$OPTARG;;
       *) continue;;
     esac
   done
 fi
+
+addPreamble () {
+echo '---
+header-includes:
+  - \usepackage{setspace}
+---
+\singlespacing' >> "${mdResume}"
+}
 
 addEmployment () {
   #If jobs have a Type value, jobs with only that type can be selected. Otherwise selects all jobs.
@@ -33,15 +44,15 @@ addHeading(){
 
 addProjects() {
   #If projects have a Type value, projects with only that type can be selected.
-  yq e '.Projects[] | "\textbf{ "+ .Name + "}'$'\n\n" + .Summary' "${ymlResume}" >> "${mdResume}"
+  yq e '.Projects[] | "\textbf{"+ .Name + "}'$'\n\n" + .Summary' "${ymlResume}" >> "${mdResume}"
 }
 
 addEducation() {
-  { yq e '.Education[] | "\textbf{Major}: "+  .Major +" - "+ .Entity +" - GPA: "+ .GPA ' "${ymlResume}"; echo "\hspace*{\fill}"; yq e '.Education[] | .End_date' "${ymlResume}" ; echo ""; yq e '.Education[] | "Concentration: "+ .Concentration' "${ymlResume}";} >> "${mdResume}"
+  { yq e '.Education[] | "\textbf{Major}: "+  .Major +" - "+ .Entity +" - GPA: "+ .GPA ' "${ymlResume}"; echo "\hspace*{\fill}"; yq e '.Education[] | .End_date +"  "' "${ymlResume}" ; yq e '.Education[] | "\textbf{Concentration}: "+ .Concentration' "${ymlResume}";} >> "${mdResume}"
 }
 
 addHorizontalLine() {
-  echo -e "\n----\n" >> "${mdResume}"
+  echo -e "----" >> "${mdResume}"
 }
 
 addSkills() {
@@ -52,7 +63,7 @@ addSkills() {
      while IFS=$'\n' read -r skill; do
       skills="${skills} ${skill}"
     done  <<< "$skillTypes"
-    printf "**%s**: %s\n\n" "${line}" "${skills}" >> "${mdResume}"
+    printf "**%s**: %s \n\n" "${line}" "${skills}" >> "${mdResume}"
   done <<< "$types"
 }
 
@@ -70,9 +81,10 @@ addActivities(){
 
 main () {
   [[ -e "${mdResume}" ]] && truncate -s0 "${mdResume}"
+  addPreamble
   addTitle
   addHorizontalLine
-  addHeading "Summary"
+  addHeading "$summaryTitle"
   addSummary
   addHeading "Education"
   addEducation
