@@ -6,7 +6,7 @@
 goal=100
 currDay="$(date -u +"%w")"
 currDate="$(date -u +%Y%m%d)"
-progressLine="$(tail -n 1 ${CHALLENGEFILE})"
+progressLine="$(tail -n 1 "${CHALLENGEFILE}")"
 [[ ${progressLine##* } = "${currDate}" ]] && repsMade="${progressLine%% *}" || repsMade=0
 
 # ------------------------- complete context -------------------------
@@ -24,11 +24,55 @@ fi
 
 
 addworkout(){
-  test -z "${1}" && echo "Please enter a workout Type (ie Arms/Legs)" && exit
+  test -z "${1}" && echo "Please enter a workout Type (A or B)" && exit
   workoutType="${1}"
-  printf "\n- date: $(date)\n  - type: %s\n  - Exercises:\n    -\n" "${workoutType}" >> "${WORKOUTLOG}" 
+  # printf "\n- date: $(date)\n  - type: %s\n  - Exercises:\n    -\n" "${workoutType}" >> "${WORKOUTLOG}" 
+  if [[ ${workoutType} == "A" ]]
+  then
+    printf "\n- date: $(date)
+  - type: %s
+  - Warmup:
+    - 25 walking jacks
+    - front punch
+    - high punch
+    - front kick
+    - 10 knee knuckle pushups
+    - in-to-out cresant kick
+    - out-to-in cresant kick
+  - Exercises:
+    - x decline knuckle pushups 3x sets
+    - x bench dumbbell rows each arm @20lbs. 3x sets
+    - x inverted bodyweight rows on doorframe. 3x sets
+    - x lunges
+    - plank1 x'xx\"xx
+    - plank2 x'xx\"xx
+    - plank3 x'xx\"xx
+" "${workoutType}" >> "${WORKOUTLOG}" 
+  elif [[ ${workoutType} == "B" ]]
+  then
+    printf "\n- date: $(date)\n  - type: %s
+  - Warmup:
+    - 26 walking jacks
+    - front punch
+    - high punch
+    - front kick
+    - 10 knee knuckle pushups
+    - in-to-out cresant kick
+    - out-to-in cresant kick
+  - Exercises:
+    - x regular knuckle pushups 3x sets
+    - x bench dumbbell rows each arm @20lbs. 3x sets
+    - x inverted bodyweight rows on doorframe. 3x sets
+    - x squats
+    - plank1 x'xx\"xx
+    - plank2 x'xx\"xx
+    - plank3 x'xx\"xx" "${workoutType}" >> "${WORKOUTLOG}" 
+    else
+      echo "Please enter A or B" && exit
+  fi
   exec vim "${WORKOUTLOG}"
 }
+
 
 addexercise(){
   printf "    -\n" >> "${WORKOUTLOG}"
@@ -47,7 +91,7 @@ setChallengeVars(){
   [[ $currDay = 3 || $currDay = 6 ]] && challenge="squats"
   [[ $currDay = 0 || $currDay = 7 ]] && echo "No Challenge today. Have a relaxing day!" && exit
   [[ ${progressLine##* } = "${currDate}" ]] || (echo "0 ${challenge} ${currDate}" >> "${CHALLENGEFILE}" && echo "Added challenge entry")
-  progressLine="$(tail -n 1 ${CHALLENGEFILE})"
+  progressLine="$(tail -n 1 "${CHALLENGEFILE}")"
 }
 
 getChallengeStatus(){
